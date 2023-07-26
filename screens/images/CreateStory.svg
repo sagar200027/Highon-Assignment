@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="33" height="41" viewBox="0 0 33 41">
+  <defs>
+    <filter id="Rectangle_105" x="0" y="0" width="33" height="41" filterUnits="userSpaceOnUse">
+      <feOffset input="SourceAlpha"/>
+      <feGaussianBlur stdDeviation="1.5" result="blur"/>
+      <feFlood flood-opacity="0.161"/>
+      <feComposite operator="in" in2="blur"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+  </defs>
+  <g id="Story_Icon" data-name="Story Icon" transform="translate(4.5 4.5)">
+    <g transform="matrix(1, 0, 0, 1, -4.5, -4.5)" filter="url(#Rectangle_105)">
+      <g id="Rectangle_105-2" data-name="Rectangle 105" transform="translate(4.5 4.5)" fill="none" stroke="#414141" stroke-width="2">
+        <rect width="24" height="32" rx="5" stroke="none"/>
+        <rect x="1" y="1" width="22" height="30" rx="4" fill="none"/>
+      </g>
+    </g>
+    <path id="Path_179" data-name="Path 179" d="M44,785v8.384" transform="translate(-32.158 -772.561)" fill="none" stroke="#414141" stroke-linecap="round" stroke-width="2.5"/>
+    <path id="Path_180" data-name="Path 180" d="M38.281,789.713H46.7" transform="translate(-30.737 -772.985)" fill="none" stroke="#414141" stroke-linecap="round" stroke-width="2.5"/>
+  </g>
+</svg>

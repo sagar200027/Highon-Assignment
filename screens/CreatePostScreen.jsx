@@ -1,4 +1,5 @@
 import {
+  Alert,
   FlatList,
   Image,
   Pressable,
@@ -14,6 +15,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import Icon1 from "react-native-vector-icons/FontAwesome5";
 import VibeTag from "./components/VibeTag";
+import axios from "axios";
 
 const primaryColor = "#0198C6";
 // const tags = [
@@ -34,9 +36,45 @@ const primaryColor = "#0198C6";
 const CreatePostScreen = (props) => {
   const image = props?.route?.params?.image;
   const [selectedTag, setSelectedTag] = useState("");
-  console.log("image", props);
+  const [description, setDescription] = useState("");
+  const [location, setLocation] = useState("");
 
-  const handleUpload = () => {};
+  const handleUpload = () => {
+    if (!(selectedTag && image)) {
+      Alert.alert("something went wrong ");
+      return;
+    }
+
+
+    const formData = new FormData();
+
+    formData.append("email", "test@gmail.com");
+    formData.append("password", "123456");
+
+    axios.post("http://localhost:3001/createpost", {
+      // mode: "cors",
+      method: "POST",
+      headers: {
+        // Accept: "application/json",
+        "Content-Type": "multipart/form-data",
+      },
+      body:formData
+      // body: JSON.stringify({
+      //   image: image,
+      //   description: description,
+      //   location: location,
+      //   vibeTag: selectedTag,
+      // }),
+    })
+      .then((res) => console.log("frontend res1", res))
+      .then((res) => {
+        console.log("frontend res", res);
+      })
+      .catch((error) => {
+        Alert.alert("error uploading this post");
+        console.error("Error saving note:", error);
+      });
+  };
 
   const renderItem = ({ index }) => {
     switch (index) {
@@ -57,7 +95,11 @@ const CreatePostScreen = (props) => {
               Description
             </Text>
             <View style={{ height: 100 }}>
-              <TextInput multiline={true} style={styles.descInputStyle} />
+              <TextInput
+                onChangeText={setDescription}
+                multiline={true}
+                style={styles.descInputStyle}
+              />
             </View>
           </View>
         );

@@ -1,5 +1,6 @@
 import {
   Alert,
+  Button,
   Dimensions,
   FlatList,
   Modal,
@@ -19,16 +20,18 @@ import { useFocusEffect, useNavigation } from "@react-navigation/native";
 
 const { width, height } = Dimensions.get("window");
 
-const HomeScreen = () => {
+const HomeScreen = (props) => {
   const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
+  const setUser = props?.route?.params?.setUser;
 
   useFocusEffect(
     useCallback(() => {
       setModalVisible(false);
-      console.log('working');
+      console.log("working");
     }, [])
   );
+
   return (
     <SafeAreaView style={styles.main}>
       <HeaderHome setModalVisible={setModalVisible} />
@@ -66,9 +69,9 @@ const HomeScreen = () => {
         </View>
       </Modal>
 
-      {/* <FlatList
+      <FlatList
         data={[0, 1, 2, 3, 4]}
-        style={{ width: "100%" }}
+        style={{ width: "100%",flex:1 }}
         contentContainerStyle={{ alignItems: "center" }}
         ItemSeparatorComponent={() => {
           return <View style={{ height: 10 }} />;
@@ -76,7 +79,15 @@ const HomeScreen = () => {
         renderItem={() => {
           return <PostCard />;
         }}
-      /> */}
+      />
+
+      <Button
+        onPress={() => {
+          setUser(null);
+        }}
+        title="Logout"
+        color={"red"}
+      />
     </SafeAreaView>
   );
 };

@@ -8,32 +8,47 @@ import HomeScreen from "./screens/HomeScreen";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import SelectPhoto from "./screens/SelectPhoto";
 import CreatePostScreen from "./screens/CreatePostScreen";
+import OnboardingScreen from "./screens/OnboardingScreen";
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState(null);
+
+  const Navigator = () => {
+    return (
+      <NavigationContainer>
+        <SafeAreaProvider>
+          <Stack.Navigator screenOptions={{ headerShown: false }}>
+            <Stack.Screen
+              name="HomeScreen"
+              initialParams={{ setUser: setUser }}
+              component={HomeScreen}
+            />
+            <Stack.Screen name="SelectPhoto" component={SelectPhoto} />
+            <Stack.Screen
+              name="CreatePostScreen"
+              component={CreatePostScreen}
+            />
+          </Stack.Navigator>
+        </SafeAreaProvider>
+      </NavigationContainer>
+    );
+  };
 
   useEffect(() => {
-    const getToken = async () => {
-      const token = await AsyncStorage.getItem("token");
-      if (token) {
-        setIsLoggedIn(true);
-      }
-      getToken();
+    const user1 = async () => {
+      const tempUser = await AsyncStorage.getItem("user");
+      console.log("tempUser", tempUser);
+      if (tempUser) setUser(tempUser);
     };
-  });
+    user1();
+  }, []);
 
   return (
-    <NavigationContainer>
-      <SafeAreaProvider>
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="HomeScreen" component={HomeScreen} />
-          <Stack.Screen name="SelectPhoto" component={SelectPhoto} />
-          <Stack.Screen name="CreatePostScreen" component={CreatePostScreen} />
-        </Stack.Navigator>
-      </SafeAreaProvider>
-    </NavigationContainer>
+    <SafeAreaProvider>
+      {user ? <Navigator /> : <OnboardingScreen setUser={setUser} />}
+    </SafeAreaProvider>
   );
 }
 

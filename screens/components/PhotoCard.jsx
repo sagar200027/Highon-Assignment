@@ -18,7 +18,6 @@ const { width, height } = Dimensions.get("window");
 const PhotoCard = ({ item, index }) => {
   const [isLiked, setIsLiked] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
   // console.log('images',images);
 
   return (

@@ -28,7 +28,7 @@ const primaryColor = "#0198C6";
 const { width, height } = Dimensions.get("window");
 
 const CreatePostScreen = (props) => {
-  const image = props?.route?.params?.image;
+  const { image, type } = props?.route?.params;
   const navigation = useNavigation();
   const [selectedTag, setSelectedTag] = useState("");
   const [description, setDescription] = useState("");
@@ -47,12 +47,13 @@ const CreatePostScreen = (props) => {
         description: description,
         location: location,
         vibeTag: selectedTag,
+        fileType: type,
       })
       // .then((res) => res.json())
       .then((res) => {
         // Alert.alert("Post uploaded successfully!");
         navigation.navigate("HomeScreen");
-        // console.log("frontend res", res);
+        console.log("frontend res", res);
       })
       .catch((error) => {
         // Alert.alert("error uploading this post");
@@ -61,36 +62,7 @@ const CreatePostScreen = (props) => {
     setLoading(false);
   };
 
-  const firebaseImageUpload = async () => {
-    if (!(selectedTag && image)) {
-      Alert.alert("something went wrong ");
-      return;
-    }
-    setLoading(true);
-
-    // Converting image to blob image
-    const blobImage = await new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      xhr.onload = function () {
-        resolve(xhr.response);
-      };
-
-      xhr.onerror = function () {
-        reject(new TypeError("Network request failed"));
-      };
-      xhr.responseType = "blob";
-      xhr.open("GET", image, true);
-      xhr.send(null);
-    });
-
-    let filename = image?.substring(image.lastIndexOf("/") + 1);
-    const metadata = {
-      contentType: "image/jpeg",
-    };
-
-    // Storage refernce, folder reference, unique name of file in firebase
-    const storageRef = ref(storage, "Highon/" + filename + Date.now());
-
+  const firebaseUpload = (storageRef, blobImage, metadata) => {
     try {
       const uploadTask = uploadBytesResumable(storageRef, blobImage, metadata);
       uploadTask.on(
@@ -118,6 +90,64 @@ const CreatePostScreen = (props) => {
       console.log("firebase error", e);
       setLoading(false);
     }
+  };
+
+  const firebaseImageUpload = async () => {
+    if (!(selectedTag && image)) {
+      Alert.alert("something went wrong ");
+      return;
+    }
+    setLoading(true);
+
+    // Converting image to blob image
+    const blobImage = await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.onload = function () {
+        resolve(xhr.response);
+      };
+
+      xhr.onerror = function () {
+        reject(new TypeError("Network request failed"));
+      };
+      xhr.responseType = "blob";
+      xhr.open("GET", image, true);
+      xhr.send(null);
+    });
+
+    // console.log("blobImage", blobImage, image);
+
+    let filename = image?.substring(image.lastIndexOf("/") + 1);
+    const metadata = {
+      contentType: "image/jpeg",
+    };
+
+    // Storage refernce, folder reference, unique name of file in firebase
+    const storageRef = ref(storage, "Highon/images/" + filename + Date.now());
+
+    firebaseUpload(storageRef, blobImage, metadata);
+  };
+
+  const firebaseVideoUpload = async () => {
+    if (!(selectedTag && image)) {
+      Alert.alert("something went wrong ");
+      return;
+    }
+    setLoading(true);
+
+    // Converting video to blob video
+
+    const response = await fetch(image);
+    const VideoBlob = await response.blob();
+
+    let filename = image?.substring(image.lastIndexOf("/") + 1);
+    const metadata = {
+      contentType: "video/mp4",
+    };
+
+    console.log("videoBlob", filename);
+    // Storage refernce, folder reference, unique name of file in firebase
+    const storageRef = ref(storage, "Highon/videos/" + filename + Date.now());
+    firebaseUpload(storageRef, VideoBlob, metadata);
   };
 
   const renderItem = ({ index }) => {
@@ -217,7 +247,9 @@ const CreatePostScreen = (props) => {
                 debounce={400}
               />
             )}
-            <View>{location && <Text style={{paddingLeft:15}}>{location}</Text>}</View>
+            <View>
+              {location && <Text style={{ paddingLeft: 15 }}>{location}</Text>}
+            </View>
           </>
         );
       }
@@ -299,7 +331,16 @@ const CreatePostScreen = (props) => {
             <Icon name="arrow-back" size={27} />
           </Pressable>
           <TouchableOpacity style={styles.postTextContainer}>
-            <Text style={{ color: "white" }} onPress={firebaseImageUpload}>
+            <Text
+              style={{ color: "white" }}
+              onPress={() => {
+                if (type == "video") {
+                  firebaseVideoUpload();
+                } else {
+                  firebaseImageUpload();
+                }
+              }}
+            >
               Post
             </Text>
           </TouchableOpacity>

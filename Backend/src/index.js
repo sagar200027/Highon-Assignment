@@ -51,6 +51,7 @@ app.get("/postlist", async (req, res) => {
         description: item?.description,
         location: item?.location,
         vibeTag: item?.vibeTag,
+        type: item?.fileType,
       };
     });
     res.json(result);

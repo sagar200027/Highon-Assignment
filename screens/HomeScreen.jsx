@@ -98,7 +98,7 @@ const HomeScreen = (props) => {
         renderItem={({ item, index }) => {
           // console.log("item", item);
           return (
-            <View style={{ marginTop: index == 0 ? 10 : 0 }}>
+            <View style={{ marginTop: index == 0 ? 10 : 0,marginBottom: index == data.length-1 ? 10 : 0 }}>
               <PostCard item={item} />
             </View>
           );

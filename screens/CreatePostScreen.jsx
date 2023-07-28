@@ -8,6 +8,8 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  ActivityIndicator,
+  Dimensions,
 } from "react-native";
 import React, { useState } from "react";
 import BackIcon from "./images/BackIcon.svg";
@@ -16,64 +18,109 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 import Icon1 from "react-native-vector-icons/FontAwesome5";
 import VibeTag from "./components/VibeTag";
 import axios from "axios";
+import { useNavigation } from "@react-navigation/native";
+import { storage } from "../Config";
+import {
+  ref,
+  getDownloadURL,
+  uploadBytes,
+  uploadBytesResumable,
+} from "firebase/storage";
+import * as ImageManipulator from "expo-image-manipulator";
 
 const primaryColor = "#0198C6";
-// const tags = [
-//   {
-//     icon: <Icon name="camera-alt" size={17} />,
-//     text: "Photography",
-//   },
-//   {
-//     icon: <Icon name="fastfood" size={15} />,
-//     text: ,
-//   },
-//   {
-//     icon: <Icon name="videogame-asset" size={18} />,
-//     text: ,
-//   },
-// ];
+const { width, height } = Dimensions.get("window");
 
 const CreatePostScreen = (props) => {
   const image = props?.route?.params?.image;
+  const navigation = useNavigation();
   const [selectedTag, setSelectedTag] = useState("");
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleUpload = () => {
-    if (!(selectedTag && image)) {
-      Alert.alert("something went wrong ");
+  const handleUpload = (downloadURL) => {
+    if (!downloadURL) {
+      Alert.alert("Something went wrong!");
       return;
     }
-
-
-    const formData = new FormData();
-
-    formData.append("email", "test@gmail.com");
-    formData.append("password", "123456");
-
-    axios.post("http://localhost:3001/createpost", {
-      // mode: "cors",
-      method: "POST",
-      headers: {
-        // Accept: "application/json",
-        "Content-Type": "multipart/form-data",
-      },
-      body:formData
-      // body: JSON.stringify({
-      //   image: image,
-      //   description: description,
-      //   location: location,
-      //   vibeTag: selectedTag,
-      // }),
-    })
-      .then((res) => console.log("frontend res1", res))
+    axios
+      .post("http://192.168.1.7:3001/createpost", {
+        image: downloadURL,
+        description: description,
+        location: location,
+        vibeTag: selectedTag,
+      })
+      // .then((res) => res.json())
       .then((res) => {
+        Alert.alert("Post uploaded successfully!");
+        navigation.navigate("HomeScreen");
         console.log("frontend res", res);
       })
       .catch((error) => {
         Alert.alert("error uploading this post");
         console.error("Error saving note:", error);
       });
+    setLoading(false);
+  };
+
+  const firebaseImageUpload = async () => {
+    if (!(selectedTag && image)) {
+      Alert.alert("something went wrong ");
+      return;
+    }
+    setLoading(true);
+
+    // Converting image to blob image
+    const blobImage = await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.onload = function () {
+        resolve(xhr.response);
+      };
+
+      xhr.onerror = function () {
+        reject(new TypeError("Network request failed"));
+      };
+      xhr.responseType = "blob";
+      xhr.open("GET", image, true);
+      xhr.send(null);
+    });
+
+    let filename = image?.substring(image.lastIndexOf("/") + 1);
+    const metadata = {
+      contentType: "image/jpeg",
+    };
+
+    // Storage refernce, folder reference, unique name of file in firebase
+    const storageRef = ref(storage, "Highon/" + filename + Date.now());
+
+    try {
+      const uploadTask = uploadBytesResumable(storageRef, blobImage, metadata);
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {},
+        (error) => {
+          switch (error.code) {
+            case "storage/unauthorized":
+              break;
+            case "storage/canceled":
+              break;
+            case "storage/unknown":
+              break;
+          }
+        },
+        () => {
+          // Upload completed successfully, now we can get the download URL
+          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+            console.log("firebase upload successful", downloadURL);
+            handleUpload(downloadURL);
+          });
+        }
+      );
+    } catch (e) {
+      console.log("firebase error", e);
+      setLoading(false);
+    }
   };
 
   const renderItem = ({ index }) => {
@@ -195,15 +242,31 @@ const CreatePostScreen = (props) => {
       }
     }
   };
-
   return (
     <SafeAreaView style={styles.main}>
+      {loading && (
+        <View
+          style={{
+            flex: 1,
+            position: "absolute",
+            justifyContent: "center",
+            alignItems: "center",
+            height: height,
+            width: width,
+            zIndex: 6,
+            backgroundColor: "rgba(0,0,0,0.5)",
+          }}
+        >
+          <ActivityIndicator />
+        </View>
+      )}
+
       <View style={styles.header}>
         <Pressable style={{ justifyContent: "center", alignItems: "center" }}>
           <Icon name="arrow-back" size={27} />
         </Pressable>
         <TouchableOpacity style={styles.postTextContainer}>
-          <Text style={{ color: "white" }} onPress={handleUpload}>
+          <Text style={{ color: "white" }} onPress={firebaseImageUpload}>
             Post
           </Text>
         </TouchableOpacity>

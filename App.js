@@ -47,7 +47,7 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      {user ? <Navigator /> : <OnboardingScreen setUser={setUser} />}
+      {!user ? <Navigator /> : <OnboardingScreen setUser={setUser} />}
     </SafeAreaProvider>
   );
 }

@@ -20,8 +20,8 @@ const SelectPhoto = () => {
       quality: 1,
     });
 
-    console.log(result);
-
+    console.log('selected photo',result);
+    
     if (!result.canceled) {
       setImage(result.assets[0].uri);
       navigation.navigate("CreatePostScreen", { image: result.assets[0].uri });
@@ -35,11 +35,12 @@ const SelectPhoto = () => {
       aspect: [4, 3],
       quality: 1,
     });
-
-    console.log(result);
+    
+    console.log('selected photo',result);
 
     if (!result.canceled) {
       setImage(result.assets[0].uri);
+      navigation.navigate("CreatePostScreen", { image: result.assets[0].uri });
     }
   };
 

@@ -9,7 +9,7 @@ import {
   Text,
   View,
 } from "react-native";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import PostCard from "./components/PostCard";
 import CrossButton from "./images/CrossButton.svg";
@@ -17,12 +17,14 @@ import CreatePost from "./images/CreatePost.svg";
 import CreateStory from "./images/CreateStory.svg";
 import HeaderHome from "./components/HeaderHome";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import axios from "axios";
 
 const { width, height } = Dimensions.get("window");
 
 const HomeScreen = (props) => {
   const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
+  const [data, setData] = useState([]);
   const setUser = props?.route?.params?.setUser;
 
   useFocusEffect(
@@ -31,6 +33,20 @@ const HomeScreen = (props) => {
       console.log("working");
     }, [])
   );
+
+  // useEffect(() => {
+  //   axios
+  //     .get("http://10.0.2.2:3001/postlist")
+  //     // .then((res) => res.json())
+  //     .then((res) => {
+  //       // console.log("frontend res", res?.data);
+  //       setData(res?.data); 
+  //     })
+  //     .catch((error) => {
+  //       Alert.alert("error fetching posts!");
+  //       console.error("Error saving note:", error);
+  //     });
+  // }, []);
 
   return (
     <SafeAreaView style={styles.main}>
@@ -70,13 +86,14 @@ const HomeScreen = (props) => {
       </Modal>
 
       <FlatList
-        data={[0, 1, 2, 3, 4]}
-        style={{ width: "100%",flex:1 }}
+        data={data}
+        style={{ width: "100%", flex: 1 }}
         contentContainerStyle={{ alignItems: "center" }}
         ItemSeparatorComponent={() => {
           return <View style={{ height: 10 }} />;
         }}
-        renderItem={() => {
+        renderItem={({ item }) => {
+          console.log("item", item);
           return <PostCard />;
         }}
       />

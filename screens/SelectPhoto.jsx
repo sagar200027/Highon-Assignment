@@ -20,8 +20,8 @@ const SelectPhoto = () => {
       quality: 1,
     });
 
-    console.log('selected photo',result);
-    
+    // console.log('selected photo',result);
+
     if (!result.canceled) {
       setImage(result.assets[0].uri);
       navigation.navigate("CreatePostScreen", { image: result.assets[0].uri });
@@ -35,8 +35,8 @@ const SelectPhoto = () => {
       aspect: [4, 3],
       quality: 1,
     });
-    
-    console.log('selected photo',result);
+
+    // console.log('selected photo',result);
 
     if (!result.canceled) {
       setImage(result.assets[0].uri);
@@ -46,9 +46,14 @@ const SelectPhoto = () => {
 
   return (
     <SafeAreaView>
-      <View style={{ paddingVertical: 20 }}>
+      <Pressable
+        onPress={() => {
+          navigation.goBack();
+        }}
+        style={{ paddingLeft:20, paddingVertical: 20 }}
+      >
         <BackIcon />
-      </View>
+      </Pressable>
 
       <View style={{ width: "90%", alignSelf: "center" }}>
         <Pressable

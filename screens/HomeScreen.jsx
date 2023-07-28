@@ -30,42 +30,45 @@ const HomeScreen = (props) => {
   useFocusEffect(
     useCallback(() => {
       setModalVisible(false);
+      axios
+        .get("http://192.168.1.7:3001/postlist")
+        // .then((res) => res.json())
+        .then((res) => {
+          // console.log("frontend res", res?.data);
+          const posts = res?.data?.reverse();
+          setData(posts);
+        })
+        .catch((error) => {
+          Alert.alert("error fetching posts!");
+          console.error("Error saving note:", error);
+        });
       console.log("working");
     }, [])
   );
 
-  // useEffect(() => {
-  //   axios
-  //     .get("http://10.0.2.2:3001/postlist")
-  //     // .then((res) => res.json())
-  //     .then((res) => {
-  //       // console.log("frontend res", res?.data);
-  //       setData(res?.data); 
-  //     })
-  //     .catch((error) => {
-  //       Alert.alert("error fetching posts!");
-  //       console.error("Error saving note:", error);
-  //     });
-  // }, []);
-
   return (
     <SafeAreaView style={styles.main}>
-      <HeaderHome setModalVisible={setModalVisible} />
+      <HeaderHome setModalVisible={setModalVisible} posts={data} />
 
       <Modal
         animationType="slide"
         transparent={true}
         visible={modalVisible}
         onRequestClose={() => {
-          Alert.alert("Modal has been closed.");
+          // Alert.alert("Modal has been closed.");
           setModalVisible(!modalVisible);
         }}
       >
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
-            <View style={{ position: "absolute", right: 7, top: 7 }}>
+            <Pressable
+              onPress={() => {
+                setModalVisible(false);
+              }}
+              style={{ position: "absolute", right: 7, top: 7 }}
+            >
               <CrossButton width={30} height={30} />
-            </View>
+            </Pressable>
             <Pressable
               style={styles.modalButton}
               onPress={() => {
@@ -92,9 +95,13 @@ const HomeScreen = (props) => {
         ItemSeparatorComponent={() => {
           return <View style={{ height: 10 }} />;
         }}
-        renderItem={({ item }) => {
-          console.log("item", item);
-          return <PostCard />;
+        renderItem={({ item, index }) => {
+          // console.log("item", item);
+          return (
+            <View style={{ marginTop: index == 0 ? 10 : 0 }}>
+              <PostCard item={item} />
+            </View>
+          );
         }}
       />
 
@@ -103,7 +110,6 @@ const HomeScreen = (props) => {
           setUser(null);
         }}
         title="Logout"
-        color={"red"}
       />
     </SafeAreaView>
   );
@@ -115,14 +121,12 @@ const styles = StyleSheet.create({
   main: {
     flex: 1,
     backgroundColor: "#FAFAFA",
-    // justifyContent: "center",
-    // alignItems: "center",
   },
   centeredView: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.2)",
+    backgroundColor: "rgba(0,0,0,0.4)",
     marginTop: 22,
   },
   modalView: {

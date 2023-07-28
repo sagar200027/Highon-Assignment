@@ -6,9 +6,8 @@ import { Dimensions } from "react-native";
 
 const { width, height } = Dimensions.get("window");
 
-const PostCard = () => {
+const PostCard = ({ item }) => {
   const [isLiked, setIsLiked] = useState(false);
-
   return (
     <View style={styles.main}>
       {/* header */}
@@ -35,7 +34,7 @@ const PostCard = () => {
           />
           <View>
             <Text style={{ fontWeight: "700" }}>Username</Text>
-            <Text style={{ fontSize: 11 }}>Arunachal Pradesh, 20 min ago</Text>
+            <Text style={{ fontSize: 11 }}>{item?.location}</Text>
           </View>
         </View>
 
@@ -52,16 +51,16 @@ const PostCard = () => {
             height: height / 4,
             resizeMode: "cover",
           }}
-          source={require("../images/sagar.jpg")}
+          source={{ uri: item?.image }}
         />
         <Pressable
-          style={{ position: "absolute",bottom:13,right:13}}
+          style={{ position: "absolute", bottom: 13, right: 13 }}
           onPress={() => setIsLiked((prev) => !prev)}
         >
           {isLiked ? (
             <Icon1 name="heart" size={20} color={"red"} />
           ) : (
-            <Icon1 name="heart-o" size={20} color={'white'} />
+            <Icon1 name="heart-o" size={20} color={"white"} />
           )}
         </Pressable>
       </View>
@@ -112,10 +111,7 @@ const PostCard = () => {
             </Text>
           </View>
         </View>
-        <Text style={{}}>
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptates
-          dolores nihil recusandae...
-        </Text>
+        <Text style={{}}>{item?.description}</Text>
       </View>
     </View>
   );
@@ -131,6 +127,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 1,
     shadowOffset: { width: 30, height: 30 },
     shadowColor: "black",
+    elevation: 4,
     width: width / 1.1,
   },
 });

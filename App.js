@@ -9,6 +9,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import SelectPhoto from "./screens/SelectPhoto";
 import CreatePostScreen from "./screens/CreatePostScreen";
 import OnboardingScreen from "./screens/OnboardingScreen";
+import Gallery from "./screens/Gallery";
 
 const Stack = createNativeStackNavigator();
 
@@ -25,6 +26,7 @@ export default function App() {
               initialParams={{ setUser: setUser }}
               component={HomeScreen}
             />
+            <Stack.Screen name="Gallery" component={Gallery} />
             <Stack.Screen name="SelectPhoto" component={SelectPhoto} />
             <Stack.Screen
               name="CreatePostScreen"

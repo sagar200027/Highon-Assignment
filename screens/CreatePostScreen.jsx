@@ -10,6 +10,7 @@ import {
   View,
   ActivityIndicator,
   Dimensions,
+  KeyboardAvoidingView,
 } from "react-native";
 import React, { useState } from "react";
 import BackIcon from "./images/BackIcon.svg";
@@ -20,13 +21,8 @@ import VibeTag from "./components/VibeTag";
 import axios from "axios";
 import { useNavigation } from "@react-navigation/native";
 import { storage } from "../Config";
-import {
-  ref,
-  getDownloadURL,
-  uploadBytes,
-  uploadBytesResumable,
-} from "firebase/storage";
-import * as ImageManipulator from "expo-image-manipulator";
+import { ref, getDownloadURL, uploadBytesResumable } from "firebase/storage";
+import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 
 const primaryColor = "#0198C6";
 const { width, height } = Dimensions.get("window");
@@ -38,6 +34,7 @@ const CreatePostScreen = (props) => {
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
   const [loading, setLoading] = useState(false);
+  const [locationDiolougOpen, setLocationDiolougOpen] = useState(false);
 
   const handleUpload = (downloadURL) => {
     if (!downloadURL) {
@@ -53,12 +50,12 @@ const CreatePostScreen = (props) => {
       })
       // .then((res) => res.json())
       .then((res) => {
-        Alert.alert("Post uploaded successfully!");
+        // Alert.alert("Post uploaded successfully!");
         navigation.navigate("HomeScreen");
-        console.log("frontend res", res);
+        // console.log("frontend res", res);
       })
       .catch((error) => {
-        Alert.alert("error uploading this post");
+        // Alert.alert("error uploading this post");
         console.error("Error saving note:", error);
       });
     setLoading(false);
@@ -112,7 +109,7 @@ const CreatePostScreen = (props) => {
         () => {
           // Upload completed successfully, now we can get the download URL
           getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-            console.log("firebase upload successful", downloadURL);
+            // console.log("firebase upload successful", downloadURL);
             handleUpload(downloadURL);
           });
         }
@@ -172,19 +169,56 @@ const CreatePostScreen = (props) => {
       }
       case 2: {
         return (
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}
-          >
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <Icon name="location-on" color={primaryColor} size={26} />
-              <Text style={[styles.titles, { marginLeft: 8 }]}>Location</Text>
-            </View>
-            <Icon name="keyboard-arrow-right" size={30} />
-          </View>
+          <>
+            <Pressable
+              onPress={() => setLocationDiolougOpen((prev) => !prev)}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <Icon name="location-on" color={primaryColor} size={26} />
+                <Text style={[styles.titles, { marginLeft: 8 }]}>Location</Text>
+              </View>
+              {locationDiolougOpen ? (
+                <Icon name="keyboard-arrow-down" size={30} />
+              ) : (
+                <Icon name="keyboard-arrow-right" size={30} />
+              )}
+            </Pressable>
+            {locationDiolougOpen && (
+              <GooglePlacesAutocomplete
+                placeholder="Type your location here!"
+                styles={{
+                  container: {
+                    flex: 1,
+                    marginTop: 4,
+                  },
+                  textInput: {
+                    fontSize: 13,
+                  },
+                }}
+                onPress={(data, details = null) => {
+                  setLocationDiolougOpen(false);
+                  setLocation(details?.formatted_address);
+                  // console.log(details?.formatted_address);
+                }}
+                fetchDetails={true}
+                returnKeyType="search"
+                enablePoweredByContainer={false}
+                minLength={2}
+                query={{
+                  key: "AIzaSyCdZX6uHPmPVdzAawWdYkhCzujiiMTU0UQ",
+                  language: "en",
+                }}
+                nearbyPlacesAPI="GooglePlacesSearch"
+                debounce={400}
+              />
+            )}
+            <View>{location && <Text style={{paddingLeft:15}}>{location}</Text>}</View>
+          </>
         );
       }
       case 3: {
@@ -242,68 +276,68 @@ const CreatePostScreen = (props) => {
       }
     }
   };
+
   return (
-    <SafeAreaView style={styles.main}>
-      {loading && (
-        <View
-          style={{
-            flex: 1,
-            position: "absolute",
-            justifyContent: "center",
-            alignItems: "center",
-            height: height,
-            width: width,
-            zIndex: 6,
-            backgroundColor: "rgba(0,0,0,0.5)",
-          }}
-        >
-          <ActivityIndicator />
-        </View>
-      )}
-
-      <View style={styles.header}>
-        <Pressable style={{ justifyContent: "center", alignItems: "center" }}>
-          <Icon name="arrow-back" size={27} />
-        </Pressable>
-        <TouchableOpacity style={styles.postTextContainer}>
-          <Text style={{ color: "white" }} onPress={firebaseImageUpload}>
-            Post
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={{}}>
-        {image && (
-          <Image
-            source={{ uri: image }}
-            style={{
-              width: 100,
-              marginTop: 50,
-              height: 100,
-              borderRadius: 10,
-            }}
-          />
+    <KeyboardAvoidingView>
+      <SafeAreaView style={styles.main}>
+        {loading && (
+          <View style={styles.activityIndicatorStyle}>
+            <Text style={{ marginBottom: 10, color: "white", fontSize: 18 }}>
+              Uploading your post...
+            </Text>
+            <ActivityIndicator size="large" />
+          </View>
         )}
-      </View>
 
-      <FlatList
-        data={[0, 1, 2, 3]}
-        ItemSeparatorComponent={() => {
-          return (
-            <View
+        <View style={styles.header}>
+          <Pressable
+            onPress={() => {
+              navigation.goBack();
+            }}
+            style={{ justifyContent: "center", alignItems: "center" }}
+          >
+            <Icon name="arrow-back" size={27} />
+          </Pressable>
+          <TouchableOpacity style={styles.postTextContainer}>
+            <Text style={{ color: "white" }} onPress={firebaseImageUpload}>
+              Post
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={{}}>
+          {image && (
+            <Image
+              source={{ uri: image }}
               style={{
-                width: "100%",
-                backgroundColor: "#707070",
-                opacity: 0.1,
-                height: 2,
-                marginVertical: 15,
+                width: 90,
+                marginTop: 10,
+                height: 90,
+                borderRadius: 10,
               }}
             />
-          );
-        }}
-        renderItem={renderItem}
-      />
-    </SafeAreaView>
+          )}
+        </View>
+
+        <FlatList
+          data={[0, 1, 2, 3]}
+          ItemSeparatorComponent={() => {
+            return (
+              <View
+                style={{
+                  width: "100%",
+                  backgroundColor: "#707070",
+                  opacity: 0.1,
+                  height: 2,
+                  marginVertical: 15,
+                }}
+              />
+            );
+          }}
+          renderItem={renderItem}
+        />
+      </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -340,5 +374,15 @@ const styles = StyleSheet.create({
   titles: {
     color: "#0198C6",
     fontWeight: "700",
+  },
+  activityIndicatorStyle: {
+    flex: 1,
+    position: "absolute",
+    justifyContent: "center",
+    alignItems: "center",
+    height: height,
+    width: width,
+    zIndex: 6,
+    backgroundColor: "rgba(0,0,0,0.5)",
   },
 });

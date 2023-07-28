@@ -1,9 +1,17 @@
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import React from "react";
 import AddPost from "../images/AddPost.svg";
 import Icon from "react-native-vector-icons/Fontisto";
+import { useNavigation } from "@react-navigation/native";
 
-const HeaderHome = ({ setModalVisible }) => {
+const HeaderHome = ({ setModalVisible, posts }) => {
+  const navigation = useNavigation();
   // const [modalVisible, setModalVisible] = useState(false);
 
   return (
@@ -22,7 +30,11 @@ const HeaderHome = ({ setModalVisible }) => {
         <TouchableOpacity onPress={() => setModalVisible(true)}>
           <AddPost />
         </TouchableOpacity>
-        <Icon name="search" style={{ marginLeft: 20 }} size={23} />
+        <Pressable
+          onPress={() => navigation.navigate("Gallery", { posts: posts })}
+        >
+          <Icon name="search" style={{ marginLeft: 20 }} size={23} />
+        </Pressable>
       </View>
     </View>
   );
